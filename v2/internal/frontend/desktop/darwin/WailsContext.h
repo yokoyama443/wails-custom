@@ -32,16 +32,6 @@
 - (void) disableWindowConstraints;
 @end
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-typedef struct objc_object WailsContext;
-
-#ifdef __cplusplus
-}
-#endif
-
 @interface WailsContext : NSObject <WKURLSchemeHandler,WKScriptMessageHandler,WKNavigationDelegate,WKUIDelegate>
 
 @property (retain) WailsWindow* mainWindow;
