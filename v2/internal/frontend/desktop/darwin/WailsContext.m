@@ -308,6 +308,18 @@ void* getMainWindowFromContext(WailsContext* ctx) {
 
     self.applicationMenu = [NSMenu new];
 
+    if (windowIsTranslucent || webviewIsTransparent) {
+        [self.mainWindow setOpaque:NO];
+        [self.mainWindow setBackgroundColor:[NSColor clearColor]];
+        [self.mainWindow setHasShadow:NO];
+        
+        // Webviewの背景も透明に
+        if (webviewIsTransparent) {
+            [self.webview setValue:@NO forKey:@"drawsBackground"];
+            [[[self.webview configuration] preferences] setValue:@YES forKey:@"transparentBackground"];
+        }
+    }
+
 }
 
 - (NSMenuItem*) newMenuItem :(NSString*)title :(SEL)selector :(NSString*)key :(NSEventModifierFlags)flags {
