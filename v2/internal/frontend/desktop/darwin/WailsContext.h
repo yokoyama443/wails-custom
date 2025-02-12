@@ -12,6 +12,16 @@
 #import <WebKit/WebKit.h>
 #import "WailsWebView.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+void* getMainWindowFromContext(WailsContext* ctx);
+
+#ifdef __cplusplus
+}
+#endif
+
 #if __has_include(<UniformTypeIdentifiers/UTType.h>)
 #define USE_NEW_FILTERS
 #import <UniformTypeIdentifiers/UTType.h>

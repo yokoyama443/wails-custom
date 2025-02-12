@@ -12,13 +12,15 @@ package darwin
 #import "window_transparency.h"
 
 #include <stdlib.h>
+
+void* getMainWindowFromContext(WailsContext* ctx) {
+    return (void*)ctx.mainWindow;
+}
 */
 import "C"
 
 import (
-	"fmt"
 	"log"
-	"os"
 	"runtime"
 	"strconv"
 	"strings"
@@ -34,29 +36,24 @@ func init() {
 }
 
 type Window struct {
-	context         unsafe.Pointer
-	nsWindow        unsafe.Pointer
+	context unsafe.Pointer
+	//nsWindow        unsafe.Pointer
 	applicationMenu *menu.Menu
 }
 
 func (w *Window) SetTransparentBackground() {
-	// ログファイルをオープン（追記モード、存在しなければ作成）
-	f, err := os.OpenFile("/tmp/wails_debug.log", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
-	if err != nil {
-		fmt.Println("Failed to open log file:", err)
-	} else {
-		// ログ出力用ロガーを作成
-		logger := log.New(f, "DEBUG: ", log.LstdFlags)
-		logger.Println("SetTransparentBackground() called")
-		// 関数終了時にログとファイルクローズを行う
-		defer func() {
-			logger.Println("SetTransparentBackground() finished")
-			f.Close()
-		}()
+	if w.context == nil {
+		return
 	}
 
-	// C の関数 setWindowTransparent を呼び出す（ここで実際に透明化処理が行われる）
-	C.setWindowTransparent(w.nsWindow)
+	// contextからmainWindowを取得
+	mainWindow := C.getMainWindowFromContext((*C.WailsContext)(w.context))
+	if mainWindow == nil {
+		return
+	}
+
+	// mainWindowを使用して透過設定
+	C.setWindowTransparent(mainWindow)
 }
 
 func bool2Cint(value bool) C.int {
@@ -74,20 +71,6 @@ func bool2CboolPtr(value bool) *C.bool {
 func NewWindow(frontendOptions *options.App, debug bool, devtools bool) *Window {
 	c := NewCalloc()
 	defer c.Free()
-
-	f, err := os.OpenFile("/tmp/wails_debug.log", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
-	if err != nil {
-		fmt.Println("Failed to open log file:", err)
-	} else {
-		// ログ出力用ロガーを作成
-		logger := log.New(f, "DEBUG: ", log.LstdFlags)
-		logger.Println("SetTransparentBackground() called")
-		// 関数終了時にログとファイルクローズを行う
-		defer func() {
-			logger.Println("SetTransparentBackground() finished")
-			f.Close()
-		}()
-	}
 
 	frameless := bool2Cint(frontendOptions.Frameless)
 	resizable := bool2Cint(!frontendOptions.DisableResize)
