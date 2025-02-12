@@ -9,6 +9,7 @@ package darwin
 #import <Foundation/Foundation.h>
 #import "Application.h"
 #import "WailsContext.h"
+#import "window_transparency.h"
 
 #include <stdlib.h>
 */
@@ -31,9 +32,14 @@ func init() {
 }
 
 type Window struct {
-	context unsafe.Pointer
-
+	context         unsafe.Pointer
+	nsWindow        unsafe.Pointer
 	applicationMenu *menu.Menu
+}
+
+func (w *Window) SetTransparentBackground() {
+	// C の関数 setWindowTransparent を呼び出す
+	C.setWindowTransparent(w.nsWindow)
 }
 
 func bool2Cint(value bool) C.int {
@@ -150,6 +156,10 @@ func NewWindow(frontendOptions *options.App, debug bool, devtools bool) *Window 
 
 	if frontendOptions.Menu != nil {
 		result.SetApplicationMenu(frontendOptions.Menu)
+	}
+
+	if frontendOptions.Mac != nil && frontendOptions.Mac.WindowIsTransparent {
+		result.SetTransparentBackground()
 	}
 
 	if debug && frontendOptions.Debug.OpenInspectorOnStartup {
