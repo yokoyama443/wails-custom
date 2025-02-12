@@ -42,13 +42,11 @@ func (w *Window) SetTransparentBackground() {
 		return
 	}
 
-	// contextからmainWindowを取得
 	mainWindow := C.getMainWindowFromContext((*C.WailsContext)(w.context))
-	if mainWindow == nil {
+	if mainWindow == C.NULL {
 		return
 	}
 
-	// mainWindowを使用して透過設定
 	C.setWindowTransparent(mainWindow)
 }
 
