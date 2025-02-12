@@ -16,7 +16,9 @@ package darwin
 import "C"
 
 import (
+	"fmt"
 	"log"
+	"os"
 	"runtime"
 	"strconv"
 	"strings"
@@ -38,7 +40,22 @@ type Window struct {
 }
 
 func (w *Window) SetTransparentBackground() {
-	// C の関数 setWindowTransparent を呼び出す
+	// ログファイルをオープン（追記モード、存在しなければ作成）
+	f, err := os.OpenFile("/tmp/wails_debug.log", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	if err != nil {
+		fmt.Println("Failed to open log file:", err)
+	} else {
+		// ログ出力用ロガーを作成
+		logger := log.New(f, "DEBUG: ", log.LstdFlags)
+		logger.Println("SetTransparentBackground() called")
+		// 関数終了時にログとファイルクローズを行う
+		defer func() {
+			logger.Println("SetTransparentBackground() finished")
+			f.Close()
+		}()
+	}
+
+	// C の関数 setWindowTransparent を呼び出す（ここで実際に透明化処理が行われる）
 	C.setWindowTransparent(w.nsWindow)
 }
 
