@@ -20,6 +20,7 @@ type Options struct {
 	Appearance           AppearanceType
 	WebviewIsTransparent bool
 	WindowIsTranslucent  bool
+	WindowIsTransparent  bool
 	Preferences          *Preferences
 	DisableZoom          bool
 	// ActivationPolicy     ActivationPolicy
