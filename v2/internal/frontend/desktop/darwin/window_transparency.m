@@ -1,16 +1,16 @@
 // window_transparency.m
+#import <Foundation/Foundation.h>
 #import <Cocoa/Cocoa.h>
+#import <WebKit/WebKit.h>
+#import "window_transparency.h"
 
 void writeLog(NSString *message) {
-    // ログを書き込むファイルのパスを指定
     NSString *logPath = @"/tmp/wails_debug.log";
     
-    // ファイルが存在しなければ作成
     if (![[NSFileManager defaultManager] fileExistsAtPath:logPath]) {
         [[NSFileManager defaultManager] createFileAtPath:logPath contents:nil attributes:nil];
     }
     
-    // ファイルハンドルを取得
     NSFileHandle *fileHandle = [NSFileHandle fileHandleForWritingAtPath:logPath];
     if (fileHandle) {
         [fileHandle seekToEndOfFile];
@@ -20,7 +20,6 @@ void writeLog(NSString *message) {
     }
 }
 
-// window_transparency.m
 void setWindowTransparent(void *windowPtr) {
     NSWindow *window = (__bridge NSWindow *)windowPtr;
     
@@ -39,23 +38,25 @@ void setWindowTransparent(void *windowPtr) {
     [visualEffectView setBlendingMode:NSVisualEffectBlendingModeBehindWindow];
     [visualEffectView setState:NSVisualEffectStateActive];
     
-    // macOS バージョンに応じた設定
     if (@available(macOS 10.14, *)) {
         [visualEffectView setMaterial:NSVisualEffectMaterialUnderWindowBackground];
     } else {
-        // 10.13以前用の設定
         [visualEffectView setMaterial:NSVisualEffectMaterialLight];
     }
     
     [contentView addSubview:visualEffectView positioned:NSWindowBelow relativeTo:nil];
     
     // WebViewの背景も透明に
-    NSArray *subviews = [contentView subviews];
-    for (NSView *view in subviews) {
+    for (NSView *view in [contentView subviews]) {
         if ([view isKindOfClass:[WKWebView class]]) {
             WKWebView *webView = (WKWebView *)view;
             [webView setValue:@NO forKey:@"drawsBackground"];
-            [[webView configuration].preferences setValue:@YES forKey:@"transparentBackground"];
+            
+            // プリファレンスの設定
+            WKPreferences *prefs = webView.configuration.preferences;
+            if ([prefs respondsToSelector:@selector(setValue:forKey:)]) {
+                [prefs setValue:@YES forKey:@"transparentBackground"];
+            }
             break;
         }
     }
