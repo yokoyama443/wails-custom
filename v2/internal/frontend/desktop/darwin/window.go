@@ -75,6 +75,20 @@ func NewWindow(frontendOptions *options.App, debug bool, devtools bool) *Window 
 	c := NewCalloc()
 	defer c.Free()
 
+	f, err := os.OpenFile("/tmp/wails_debug.log", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	if err != nil {
+		fmt.Println("Failed to open log file:", err)
+	} else {
+		// ログ出力用ロガーを作成
+		logger := log.New(f, "DEBUG: ", log.LstdFlags)
+		logger.Println("SetTransparentBackground() called")
+		// 関数終了時にログとファイルクローズを行う
+		defer func() {
+			logger.Println("SetTransparentBackground() finished")
+			f.Close()
+		}()
+	}
+
 	frameless := bool2Cint(frontendOptions.Frameless)
 	resizable := bool2Cint(!frontendOptions.DisableResize)
 	fullscreen := bool2Cint(frontendOptions.Fullscreen)
