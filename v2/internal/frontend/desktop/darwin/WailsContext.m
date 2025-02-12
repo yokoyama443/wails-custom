@@ -17,6 +17,10 @@
 
 typedef void (^schemeTaskCaller)(id<WKURLSchemeTask>);
 
+void* getMainWindowFromContext(WailsContext* ctx) {
+    return (void*)ctx.mainWindow;
+}
+
 @implementation WailsWindow
 
 - (BOOL)canBecomeKeyWindow

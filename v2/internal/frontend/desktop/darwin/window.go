@@ -12,10 +12,6 @@ package darwin
 #import "window_transparency.h"
 
 #include <stdlib.h>
-
-void* getMainWindowFromContext(WailsContext* ctx) {
-    return (void*)ctx.mainWindow;
-}
 */
 import "C"
 
