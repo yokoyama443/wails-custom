@@ -20,6 +20,7 @@ void writeLog(NSString *message) {
     }
 }
 
+// window_transparency.m
 void setWindowTransparent(void *windowPtr) {
     NSWindow *window = (__bridge NSWindow *)windowPtr;
     
@@ -28,10 +29,8 @@ void setWindowTransparent(void *windowPtr) {
     // 基本的な透過設定
     [window setOpaque:NO];
     [window setBackgroundColor:[NSColor clearColor]];
-    [window setAlphaValue:1.0];  // 必要に応じて調整可能
-    
-    // vibrancyの設定
-    [window setHasShadow:NO];  // 影を無効化
+    [window setAlphaValue:1.0];
+    [window setHasShadow:NO];
     
     // Visual Effect Viewの設定
     NSView *contentView = [window contentView];
@@ -39,9 +38,27 @@ void setWindowTransparent(void *windowPtr) {
     [visualEffectView setAutoresizingMask:NSViewWidthSizable | NSViewHeightSizable];
     [visualEffectView setBlendingMode:NSVisualEffectBlendingModeBehindWindow];
     [visualEffectView setState:NSVisualEffectStateActive];
-    [visualEffectView setMaterial:NSVisualEffectMaterialUnderWindowBackground];
+    
+    // macOS バージョンに応じた設定
+    if (@available(macOS 10.14, *)) {
+        [visualEffectView setMaterial:NSVisualEffectMaterialUnderWindowBackground];
+    } else {
+        // 10.13以前用の設定
+        [visualEffectView setMaterial:NSVisualEffectMaterialLight];
+    }
     
     [contentView addSubview:visualEffectView positioned:NSWindowBelow relativeTo:nil];
+    
+    // WebViewの背景も透明に
+    NSArray *subviews = [contentView subviews];
+    for (NSView *view in subviews) {
+        if ([view isKindOfClass:[WKWebView class]]) {
+            WKWebView *webView = (WKWebView *)view;
+            [webView setValue:@NO forKey:@"drawsBackground"];
+            [[webView configuration].preferences setValue:@YES forKey:@"transparentBackground"];
+            break;
+        }
+    }
     
     writeLog([NSString stringWithFormat:@"[DEBUG] After transparency update, isOpaque: %d", [window isOpaque]]);
     writeLog([NSString stringWithFormat:@"[DEBUG] Window alpha value: %f", [window alphaValue]]);
